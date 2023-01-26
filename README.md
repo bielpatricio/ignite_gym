@@ -5,7 +5,6 @@
 <br />
 <div align="center">
   <img src="src/assets/logo.svg" alt="Logo">
-  <h1 align="center">Ignite Gym</h3>
 </div>
 
 <!-- TABLE OF CONTENTS -->
