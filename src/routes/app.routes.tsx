@@ -51,6 +51,7 @@ export function AppRoutes() {
           ),
         }}
       />
+
       <Screen
         name="exercise"
         component={Exercise}

@@ -18,6 +18,7 @@ export const theme = extendTheme({
     },
 
     indigo: {
+      300: '#a5b4fc',
       500: '#818cf8',
       700: '#4f46e5',
     },

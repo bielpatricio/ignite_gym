@@ -18,12 +18,12 @@ export default function App() {
 
   return (
     <NativeBaseProvider theme={theme}>
-      {fontsLoaded ? <Routes /> : <Loading />}
       <StatusBar
         barStyle="light-content"
         backgroundColor="transparent"
         translucent
       />
+      {fontsLoaded ? <Routes /> : <Loading />}
     </NativeBaseProvider>
   )
 }
