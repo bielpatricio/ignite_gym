@@ -40,6 +40,18 @@ $ npm i
 $ expo start
 # The application will runing, so you will have to open the `Expo Go` app on your smartphone 
 # and read the QR Code on your terminal
+
+# The backend was not built by me, so we took it from the other repository
+$ git clone https://github.com/rodrigorgtic/ignitegym-api.git
+# To run the back-end you need install the dependencies 
+$ npm i
+# And run the api with `npm start` or
+$ npm run dev
+# The api will start on port:3333.
+# The docs can be access on localhost:3333/api-docs/
+
+# To conect a database, open a db tool
+# go to the file inside ignitegym-api/src/database/ and select database.db
 ```
 
 # Prints e Layout
