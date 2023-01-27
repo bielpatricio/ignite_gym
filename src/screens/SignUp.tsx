@@ -14,10 +14,13 @@ import { Input } from '@components/Input'
 import { Button } from '@components/Button'
 import { useNavigation } from '@react-navigation/native'
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes'
-import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
+import { api } from '@services/axios'
+import { AppError } from '@utils/AppError'
+import { useState } from 'react'
+import { useAuth } from '@hooks/useAuth'
 
 type FormSignUp = {
   name: string
@@ -43,11 +46,15 @@ const signUpSchema = yup.object({
 })
 
 export function SignUp() {
+  const [isLoading, setIsLoading] = useState(false)
   const navigation = useNavigation<AuthNavigatorRoutesProps>()
+
+  const { handleSignIn } = useAuth()
 
   const {
     control,
     handleSubmit,
+    reset,
     formState: { isSubmitting, errors },
   } = useForm<FormSignUp>({
     resolver: yupResolver(signUpSchema),
@@ -61,9 +68,29 @@ export function SignUp() {
 
   const toast = useToast()
 
-  function handleSignUp(data: FormSignUp) {
-    const { name, email, password, confirmPassword } = data
-    console.log(data)
+  async function handleSignUp(data: FormSignUp) {
+    const { name, email, password } = data
+    try {
+      setIsLoading(true)
+      await api.post('/users', {
+        name,
+        email,
+        password,
+      })
+      await handleSignIn(email, password)
+    } catch (error) {
+      setIsLoading(false)
+      const isAppError = error instanceof AppError
+      const title = isAppError
+        ? error.message
+        : 'Error to create a new user. Try again later.'
+
+      toast.show({
+        title,
+        placement: 'bottom',
+        bgColor: 'red.500',
+      })
+    }
   }
 
   function handleGoBackToSignIn() {
@@ -164,7 +191,11 @@ export function SignUp() {
             }}
           />
 
-          <Button onPress={handleSubmit(handleSignUp)} title="Sign-up" />
+          <Button
+            isLoading={isLoading}
+            onPress={handleSubmit(handleSignUp)}
+            title="Sign-up"
+          />
         </Center>
 
         <Button

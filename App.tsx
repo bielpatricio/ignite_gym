@@ -11,6 +11,7 @@ import { Loading } from '@components/Loading'
 import { NativeBaseProvider } from 'native-base'
 import { Routes } from '@routes/index'
 // import { Routes } from './src/routes/index'
+import { AuthContextProvider } from './src/contexts/AuthContext'
 
 export default function App() {
   // eslint-disable-next-line
@@ -23,7 +24,9 @@ export default function App() {
         backgroundColor="transparent"
         translucent
       />
-      {fontsLoaded ? <Routes /> : <Loading />}
+      <AuthContextProvider>
+        {fontsLoaded ? <Routes /> : <Loading />}
+      </AuthContextProvider>
     </NativeBaseProvider>
   )
 }
