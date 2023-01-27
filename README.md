@@ -13,21 +13,22 @@
 
 <p align="center">
     <p><a href="#about-the-project" title=" go to About the Project">About The Project</a></p>
-    <p><a href="#running-locally" title=" go to Running locally">Running locally</a></p>
-    <p><a href="#prints-e-layout" title=" go to Prints e Layout">Layout</a></p>
-    <p><a href="#contact" title=" go to Contact">Contact</a></p>
+    <p><a href="#iphone-running-locally" title=" go to Running locally">Running locally</a></p>
+    <p><a href="#-prints-e-layout" title=" go to Prints e Layout">Prints and Layout</a></p>
+    <p><a href="#-technologies-used" title=" go to Technologies Used">Technologies Used</a></p>
+    <p><a href="#computer-contact" title=" go to Contact">Contact</a></p>
   </p>
 
 <br>
 <!-- ABOUT THE PROJECT -->
 
-# About The Project
+# 💡About The Project
 
-Teams Ignite App using React Native! Project of React Native Ignite from Rocketseat.
+Ignite Gym App using React Native! Project of React Native Ignite from Rocketseat.
 
 <br>
 
-# Running locally
+# :iphone: Running locally
 
 ```bash
 # Clone this repository
@@ -54,12 +55,12 @@ $ npm run dev
 # go to the file inside ignitegym-api/src/database/ and select database.db
 ```
 
-# Prints e Layout
+# 🖼 Prints e Layout
 
 The application layout is available on Figma:
 
 <a href="https://www.figma.com/file/IXVAFXnByVNGzfAaKakk78/Ignite-Gym-(Community)?node-id=307%3A5895&t=QXc1sMzh2O5BKSAm-0">
-  <img alt="Made by rocketseat" src="https://img.shields.io/badge/Acessar%20Layout%20-Figma-%2304D361">
+  <img alt="Made by rocketseat" src="https://user-images.githubusercontent.com/32223762/215221130-b70ea8e0-41e3-4077-8bed-7ca6678d8261.png" width="150">  
 </a>
 <br>
 
@@ -68,8 +69,14 @@ The application layout is available on Figma:
   <br>
 
 <br>
+  
+# 💻 Technologies Used
 
-# Contact
+ ![image](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) ![image](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![image](https://img.shields.io/badge/Expo-FFFFFF?style=for-the-badge&logo=expo&logoColor=black)
+<br>
+ <br>
+  
+# :computer: Contact
 
 Gabriel Patrício - gabrieltp087@gmail.com - [https://github.com/bielpatricio/](https://github.com/bielpatricio)
 
