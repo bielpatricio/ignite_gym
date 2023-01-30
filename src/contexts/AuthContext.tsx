@@ -24,6 +24,8 @@ type AuthContextDataProps = {
   handleSignIn: (email: string, password: string) => Promise<void>
   isLoadingUserStorageData: boolean
   handleSignOut: () => void
+  handleUpdateUserProfile: (userUpdate: UserDTO) => Promise<void>
+  refreshToken: string
 }
 
 export const AuthContext = createContext({} as AuthContextDataProps)
@@ -35,6 +37,7 @@ interface AuthProviderProps {
 export function AuthContextProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<UserDTO>({} as UserDTO)
   const [isLoadingUserStorageData, setIsLoadingUserStorageData] = useState(true)
+  const [refreshToken, setRefreshedToken] = useState('')
 
   async function userAndTokenUpdate(userData: UserDTO, token: string) {
     api.defaults.headers.common.Authorization = `Bearer ${token}`
@@ -73,7 +76,18 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
     }
   }
 
-  async function handleSignOut() {
+  async function handleUpdateUserProfile(userUpdate: UserDTO) {
+    // eslint-disable-next-line
+    try {
+      setUser(userUpdate)
+      await storageUserSave(userUpdate)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // async function handleSignOut() {
+  const handleSignOut = useCallback(async () => {
     try {
       setIsLoadingUserStorageData(true)
       setUser({} as UserDTO)
@@ -86,7 +100,7 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
     } finally {
       setIsLoadingUserStorageData(false)
     }
-  }
+  }, [])
 
   // async function loadUserData() {
   const loadUserData = useCallback(async () => {
@@ -111,6 +125,21 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
     loadUserData()
   }, [loadUserData])
 
+  function refreshedTokenUpdated(newToken: string) {
+    setRefreshedToken(newToken)
+  }
+
+  useEffect(() => {
+    const subscribe = api.registerInterceptTokenManager({
+      signOut: handleSignOut,
+      refreshedTokenUpdated,
+    })
+
+    return () => {
+      subscribe()
+    }
+  }, [handleSignOut])
+
   return (
     <AuthContext.Provider
       value={{
@@ -118,6 +147,8 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
         handleSignIn,
         isLoadingUserStorageData,
         handleSignOut,
+        handleUpdateUserProfile,
+        refreshToken,
       }}
     >
       {children}

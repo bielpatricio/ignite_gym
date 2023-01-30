@@ -14,11 +14,15 @@ import {
 import { useState } from 'react'
 import { Alert, TouchableOpacity } from 'react-native'
 
+import avatarDefault from '@assets/userPhotoDefault.png'
 import * as ImagePicker from 'expo-image-picker'
 import * as FileSystem from 'expo-file-system'
 import * as yup from 'yup'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { AppError } from '@utils/AppError'
+import { useAuth } from '../hooks/useAuth'
+import { api } from '@services/axios'
 
 const PHOTO_SIZE = 33
 
@@ -27,48 +31,59 @@ type FormProfile = {
   oldPassword: string
   newPassword: string
   confirmNewPassword: string
+  email: string
 }
 
 const ProfileFormSchema = yup.object({
   name: yup.string().required('Inform a name.'),
   oldPassword: yup
     .string()
-    .required('Inform a password.')
-    .min(6, 'Minimum 6 characters.'),
+    .min(6, 'Minimum 6 characters.')
+    .nullable()
+    .transform((value) => value || null),
   newPassword: yup
     .string()
-    .required('Inform a password.')
-    .min(6, 'Minimum 6 characters.'),
+    .min(6, 'Minimum 6 characters.')
+    .nullable()
+    .transform((value) => value || null),
   confirmNewPassword: yup
     .string()
-    .required('Confirm the password.')
+    .nullable()
+    .transform((value) => value || null)
     .oneOf(
       [yup.ref('newPassword'), null],
       'The password is different of confirm password!',
-    ),
+    )
+    .when('newPassword', {
+      is: (Field: any) => Field,
+      then: yup
+        .string()
+        .nullable()
+        .required('Inform the confirm password.')
+        .transform((value) => value || null),
+    }),
 })
 
 export function Profile() {
   const [photoIsLoading, setPhotoIsLoading] = useState(false)
-  const [photoSelected, setPhotoSelected] = useState(
-    'https://github.com/bielpatricio.png',
-  )
+
+  const [isLoading, setIsLoading] = useState(false)
+  const toast = useToast()
+
+  const { user, handleUpdateUserProfile } = useAuth()
 
   const {
     control,
     handleSubmit,
+    reset,
     formState: { isSubmitting, errors },
   } = useForm<FormProfile>({
     resolver: yupResolver(ProfileFormSchema),
     defaultValues: {
-      name: 'Biel',
-      oldPassword: '',
-      newPassword: '',
-      confirmNewPassword: '',
+      name: user.name,
+      email: user.email,
     },
   })
-
-  const toast = useToast()
 
   async function handleUserImageSelect() {
     setPhotoIsLoading(true)
@@ -95,26 +110,96 @@ export function Profile() {
             bgColor: 'red.500',
           })
         }
-        setPhotoSelected(imageSelected.assets[0].uri)
+
+        const fileExtension = imageSelected.assets[0].uri.split('.').pop()
+
+        const photoFile = {
+          name: `${user.name}.${fileExtension}`.toLowerCase(),
+          uri: imageSelected.assets[0].uri,
+          type: `${imageSelected.assets[0].type}/${fileExtension}`,
+        } as any
+
+        console.log(photoFile)
+
+        const userPhotoUploadForm = new FormData()
+        userPhotoUploadForm.append('avatar', photoFile)
+
+        console.log(userPhotoUploadForm)
+
+        const responseAvatar = await api.patch(
+          '/users/avatar',
+          userPhotoUploadForm,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        )
+
+        const userUpdated = user
+        userUpdated.avatar = responseAvatar.data.avatar
+
+        await handleUpdateUserProfile(userUpdated)
+
+        toast.show({
+          title: 'Avatar changed.',
+          placement: 'top',
+          bgColor: 'indigo.500',
+        })
       }
     } catch (error) {
       console.log(error)
+      const isAppError = error instanceof AppError
+
+      const title = isAppError ? error.message : 'Unable to update the Avatar.'
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500',
+      })
     } finally {
       setPhotoIsLoading(false)
     }
   }
 
-  function handleSaveEditions(data: FormProfile) {
-    const { oldPassword, newPassword, confirmNewPassword } = data
+  async function handleSaveEditions(data: FormProfile) {
+    const { oldPassword, newPassword, name } = data
 
-    if (oldPassword === newPassword) {
-      return toast.show({
-        title: 'The old password is equal to the new password!',
+    try {
+      setIsLoading(true)
+      console.log(data)
+
+      const response = await api.put('/users', {
+        name,
+        password: newPassword,
+        old_password: oldPassword,
+      })
+
+      const userUpdated = user
+      userUpdated.name = name
+      await handleUpdateUserProfile(userUpdated)
+
+      toast.show({
+        title: 'User updated with success!',
+        placement: 'top',
+        bgColor: 'indigo.500',
+      })
+
+      reset()
+    } catch (error) {
+      const isAppError = error instanceof AppError
+
+      const title = isAppError ? error.message : 'Unable to update the user.'
+
+      toast.show({
+        title,
         placement: 'top',
         bgColor: 'red.500',
       })
+    } finally {
+      setIsLoading(false)
     }
-    console.log(data)
   }
 
   return (
@@ -133,13 +218,20 @@ export function Profile() {
             />
           ) : (
             <Avatar
-              source={{ uri: photoSelected }}
+              source={
+                user.avatar
+                  ? { uri: `${api.defaults.baseURL}/avatar/${user.avatar}` }
+                  : avatarDefault
+              }
               alt="User Avatar"
               size={PHOTO_SIZE}
             />
           )}
 
-          <TouchableOpacity onPress={handleUserImageSelect}>
+          <TouchableOpacity
+            disabled={photoIsLoading}
+            onPress={handleUserImageSelect}
+          >
             <Text
               color="indigo.300"
               fontSize="md"
@@ -166,7 +258,22 @@ export function Profile() {
               )
             }}
           />
-          <Input placeholder="E-mail" bg="gray.600" isDisabled />
+
+          <Controller
+            control={control}
+            name="email"
+            render={({ field }) => {
+              return (
+                <Input
+                  placeholder="E-mail"
+                  bg="gray.600"
+                  onChangeText={field.onChange}
+                  value={field.value}
+                  isDisabled
+                />
+              )
+            }}
+          />
         </Center>
 
         <VStack mt={12} mb={9} px={10}>
@@ -229,6 +336,7 @@ export function Profile() {
             onPress={handleSubmit(handleSaveEditions)}
             title="Save editions"
             mt={4}
+            isLoading={isLoading}
           />
         </VStack>
       </ScrollView>
