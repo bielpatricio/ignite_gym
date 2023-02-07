@@ -64,7 +64,13 @@ The application layout is available on Figma:
 </a>
 <br>
 
+<p align="center">
 
+![20230206_230838](https://user-images.githubusercontent.com/32223762/217135106-8fa5dbfe-d3e3-43d0-8ab8-d9dd75211c5b.gif) &nbsp; &nbsp; &nbsp; ![20230206_231936](https://user-images.githubusercontent.com/32223762/217135096-5425908f-611a-41d3-8b93-9318a10bab1a.gif)
+  
+  </p>
+
+<br>
 <p align="center" style="display: flex; align-items: flex-start; justify-content: center;">
   <br>
 
